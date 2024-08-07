@@ -110,6 +110,7 @@ public class PaperPacketTabList extends TabListBase<Component> {
                 boolean rewriteEntry = false;
                 Component displayName = nmsData.displayName();
                 int latency = nmsData.latency();
+                boolean listed = nmsData.listed();
                 if (actions.contains(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME)) {
                     Component expectedDisplayName = getExpectedDisplayName(nmsData.profileId());
                     if (expectedDisplayName != null) {
@@ -127,8 +128,15 @@ public class PaperPacketTabList extends TabListBase<Component> {
                 if (actions.contains(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER)) {
                     TAB.getInstance().getFeatureManager().onEntryAdd(player, nmsData.profileId(), nmsData.profile().getName());
                 }
+                if (actions.contains(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED)) {
+                    boolean newListed = TAB.getInstance().getFeatureManager().shouldHideEntry(player, nmsData.profileId(), listed);
+                    if (listed != newListed) {
+                        listed = newListed;
+                        rewriteEntry = rewritePacket = true;
+                    }
+                }
                 updatedList.add(rewriteEntry ? new ClientboundPlayerInfoUpdatePacket.Entry(
-                        nmsData.profileId(), nmsData.profile(), nmsData.listed(), latency, nmsData.gameMode(), displayName, nmsData.chatSession()
+                        nmsData.profileId(), nmsData.profile(), listed, latency, nmsData.gameMode(), displayName, nmsData.chatSession()
                 ) : nmsData);
             }
             if (rewritePacket) entries.set(info, updatedList);

@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
  * Scoreboard - disabling tab's scoreboard to prevent conflict
  * PingSpoof - full feature functionality
  * NickCompatibility - Detect name changes from other plugins
+ * HideRealPlayers - Hide players listed on tablist when using Layout
  */
 public abstract class PipelineInjector extends TabFeature implements JoinListener, Loadable, UnLoadable {
 

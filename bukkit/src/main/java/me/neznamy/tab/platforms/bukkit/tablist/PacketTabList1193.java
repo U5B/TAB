@@ -25,6 +25,7 @@ public class PacketTabList1193 extends PacketTabList18 {
     private static Enum actionAddPlayer;
     private static Enum actionUpdateDisplayName;
     private static Enum actionUpdateLatency;
+    private static Enum actionUpdateListed;
 
     private static Constructor<?> newRemovePacket;
 
@@ -80,12 +81,13 @@ public class PacketTabList1193 extends PacketTabList18 {
         actionAddPlayer = Enum.valueOf(ActionClass, Action.ADD_PLAYER.name());
         actionUpdateDisplayName = Enum.valueOf(ActionClass, Action.UPDATE_DISPLAY_NAME.name());
         actionUpdateLatency = Enum.valueOf(ActionClass, Action.UPDATE_LATENCY.name());
+        actionUpdateListed = Enum.valueOf(ActionClass, Action.UPDATE_LISTED.name());
 
         actionToEnumSet.put(Action.ADD_PLAYER, EnumSet.allOf(ActionClass));
         actionToEnumSet.put(Action.UPDATE_GAME_MODE, EnumSet.of(Enum.valueOf(ActionClass, Action.UPDATE_GAME_MODE.name())));
         actionToEnumSet.put(Action.UPDATE_DISPLAY_NAME, EnumSet.of(actionUpdateDisplayName));
         actionToEnumSet.put(Action.UPDATE_LATENCY, EnumSet.of(actionUpdateLatency));
-        actionToEnumSet.put(Action.UPDATE_LISTED, EnumSet.of(Enum.valueOf(ActionClass, Action.UPDATE_LISTED.name())));
+        actionToEnumSet.put(Action.UPDATE_LISTED, EnumSet.of(actionUpdateListed));
     }
 
     @Override
@@ -131,6 +133,7 @@ public class PacketTabList1193 extends PacketTabList18 {
             GameProfile profile = (GameProfile) PlayerInfoData_Profile.get(nmsData);
             Object displayName = PlayerInfoData_DisplayName.get(nmsData);
             int latency = PlayerInfoData_Latency.getInt(nmsData);
+            boolean listed = PlayerInfoData_Listed.getBoolean(nmsData);
             if (actions.contains(actionUpdateDisplayName)) {
                 Object expectedName = getExpectedDisplayName(id);
                 if (expectedName != null && expectedName != displayName) {
@@ -148,11 +151,19 @@ public class PacketTabList1193 extends PacketTabList18 {
             if (actions.contains(actionAddPlayer)) {
                 TAB.getInstance().getFeatureManager().onEntryAdd(player, id, profile.getName());
             }
+
+            if (actions.contains(actionUpdateListed)) {
+                boolean newListed = TAB.getInstance().getFeatureManager().shouldHideEntry(player, id, listed);
+                if (listed != newListed) {
+                    listed = newListed;
+                    rewriteEntry = rewritePacket = true;
+                }
+            }
             // 1.19.3 is using records, which do not allow changing final fields, need to rewrite the list entirely
             updatedList.add(rewriteEntry ? newPlayerInfoData.newInstance(
                     id,
                     profile,
-                    PlayerInfoData_Listed.getBoolean(nmsData),
+                    listed,
                     latency,
                     PlayerInfoData_GameMode.get(nmsData),
                     displayName,

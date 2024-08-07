@@ -154,6 +154,7 @@ public class Loader_1_21 implements Loader {
             GameProfile profile = nmsData.profile();
             Component displayName = nmsData.displayName();
             int latency = nmsData.latency();
+            boolean listed = nmsData.listed();
             if (actions.contains(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME)) {
                 Component expectedDisplayName = ((FabricTabPlayer)receiver).getTabList().getExpectedDisplayName(nmsData.profileId());
                 if (expectedDisplayName != null) displayName = expectedDisplayName;
@@ -164,7 +165,10 @@ public class Loader_1_21 implements Loader {
             if (actions.contains(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER)) {
                 TAB.getInstance().getFeatureManager().onEntryAdd(receiver, nmsData.profileId(), profile.getName());
             }
-            updatedList.add(new ClientboundPlayerInfoUpdatePacket.Entry(nmsData.profileId(), profile, nmsData.listed(), latency, nmsData.gameMode(), displayName, nmsData.chatSession()));
+            if (actions.contains(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED)) {
+                listed = TAB.getInstance().getFeatureManager().shouldHideEntry(receiver, nmsData.profileId(), listed);
+            }
+            updatedList.add(new ClientboundPlayerInfoUpdatePacket.Entry(nmsData.profileId(), profile, listed, latency, nmsData.gameMode(), displayName, nmsData.chatSession()));
         }
         packet.entries = updatedList;
     }

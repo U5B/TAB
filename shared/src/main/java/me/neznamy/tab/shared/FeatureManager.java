@@ -42,6 +42,9 @@ public class FeatureManager {
     /** Flag tracking presence of a feature listening to latency change for faster check with better performance */
     private boolean hasLatencyChangeListener;
 
+    /** Flag traacking presence of a feature listening to hide entries for faster check with better performance */
+    private boolean hasHideEntryListener;
+
     /** Flag tracking presence of a feature listening to command preprocess for faster check with better performance */
     private boolean hasCommandListener;
 
@@ -495,6 +498,29 @@ public class FeatureManager {
     }
 
     /**
+     * Forwards listing change to all features and returns if listing should to use.
+     *
+     * @param   packetReceiver
+     *          Player who received the packet
+     * @param   id
+     *          UUID of player whose ping changed
+     * @param   latency
+     *          Latency in the packet
+     * @return  New latency to use
+     */
+    public boolean shouldHideEntry(TabPlayer packetReceiver, UUID id, boolean listed) {
+        if (!hasHideEntryListener) return listed;
+        boolean newListing = listed;
+        for (TabFeature f : values) {
+            if (!(f instanceof HideEntryListener)) continue;
+            long time = System.nanoTime();
+            newListing = ((HideEntryListener)f).shouldHideEntry(packetReceiver, id, newListing);
+            TAB.getInstance().getCPUManager().addTime(f.getFeatureName(), CpuUsageCategory.HIDE_ENTRY_CHANGE, System.nanoTime() - time);
+        }
+        return newListing;
+    }
+
+    /**
      * Registers feature with given parameters.
      *
      * @param   featureName
@@ -513,6 +539,9 @@ public class FeatureManager {
         }
         if (featureHandler instanceof LatencyListener) {
             hasLatencyChangeListener = true;
+        }
+        if (featureHandler instanceof HideEntryListener) {
+            hasHideEntryListener = true;
         }
         if (featureHandler instanceof CommandListener) {
             hasCommandListener = true;

@@ -465,6 +465,7 @@ public class Converter {
     /**
      * Converts config from 4.1.5 to 5.0.0.
      * This removes unlimited nametag mode option from config, which got removed.
+     * This also adds hide-real-players to Layout.
      *
      * @param   config
      *          Config file
@@ -474,6 +475,9 @@ public class Converter {
             TAB.getInstance().getPlatform().logInfo(TabComponent.fromColoredText(EnumChatFormat.YELLOW + "Performing configuration conversion from 4.1.5 to 5.0.0"));
             config.removeOption("scoreboard-teams.unlimited-nametag-mode");
             config.removeOption("scoreboard.respect-other-plugins");
+        }
+        if (!config.hasConfigOption("layout.hide-real-players")) {
+            config.set("layout.hide-real-players", false);
         }
     }
 }

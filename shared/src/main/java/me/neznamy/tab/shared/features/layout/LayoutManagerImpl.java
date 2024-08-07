@@ -33,6 +33,7 @@ public class LayoutManagerImpl extends RefreshableFeature implements LayoutManag
     private final boolean remainingPlayersTextEnabled = config().getBoolean("layout.enable-remaining-players-text", true);
     private final String remainingPlayersText = EnumChatFormat.color(config().getString("layout.remaining-players-text", "... and %s more"));
     private final int emptySlotPing = config().getInt("layout.empty-slot-ping-value", 1000);
+    private final boolean hideRealPlayers = config().getBoolean("layout.hide-real-players", false);
 
     private final SkinManager skinManager = new SkinManager(defaultSkin, defaultSkinHashMap);
     private final Map<Integer, UUID> uuids = new HashMap<>();
@@ -84,6 +85,11 @@ public class LayoutManagerImpl extends RefreshableFeature implements LayoutManag
         pingSpoof = TAB.getInstance().getFeatureManager().getFeature(TabConstants.Feature.PING_SPOOF);
         teamsEnabled = TAB.getInstance().getNameTagManager() != null;
         if (pingSpoof == null) TAB.getInstance().getFeatureManager().registerFeature(TabConstants.Feature.LAYOUT_LATENCY, new LayoutLatencyRefresher());
+        if (hideRealPlayers) {
+            TAB.getInstance().getFeatureManager().registerFeature(TabConstants.Feature.LAYOUT_HIDE_REAL_PLAYERS, new LayoutHideRealPlayers());
+            LayoutHideRealPlayers hideRealPlayers = TAB.getInstance().getFeatureManager().getFeature(TabConstants.Feature.LAYOUT_HIDE_REAL_PLAYERS);
+            hideRealPlayers.load();
+        }
         for (TabPlayer p : TAB.getInstance().getOnlinePlayers()) {
             onJoin(p);
         }
