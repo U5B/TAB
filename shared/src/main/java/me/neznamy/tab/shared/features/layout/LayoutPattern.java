@@ -21,15 +21,17 @@ public class LayoutPattern extends RefreshableFeature implements Layout {
     @Nullable private final Condition condition;
     private final Map<Integer, FixedSlot> fixedSlots = new HashMap<>();
     private final List<GroupPattern> groups = new ArrayList<>();
+    private boolean ignoreEmptySlots;
 
     @SuppressWarnings("unchecked")
     public LayoutPattern(@NotNull LayoutManagerImpl manager, @NotNull String name, @NotNull Map<String, Object> map) {
         super(manager.getFeatureName(), "Updating player groups");
         this.manager = manager;
         this.name = name;
-        TAB.getInstance().getConfigHelper().startup().checkForInvalidObjectProperties("layout", name, map, Arrays.asList("condition", "fixed-slots", "groups"));
+        TAB.getInstance().getConfigHelper().startup().checkForInvalidObjectProperties("layout", name, map, Arrays.asList("condition", "fixed-slots", "groups", "ignore-empty-slots"));
         condition = Condition.getCondition((String) map.get("condition"));
         if (condition != null) manager.addUsedPlaceholder(TabConstants.Placeholder.condition(condition.getName()));
+        ignoreEmptySlots = (boolean) map.getOrDefault("ignore-empty-slots", false);
         for (String fixedSlot : (List<String>)map.getOrDefault("fixed-slots", Collections.emptyList())) {
             addFixedSlot(fixedSlot);
         }
@@ -106,5 +108,11 @@ public class LayoutPattern extends RefreshableFeature implements Layout {
     public void addGroup(@Nullable String condition, int[] slots) {
         ensureActive();
         addGroup(UUID.randomUUID().toString(), Condition.getCondition(condition), slots);
+    }
+
+    @Override
+    public void setIgnoreEmptySlots(boolean ignore) {
+        ensureActive();
+        ignoreEmptySlots = ignore;
     }
 }

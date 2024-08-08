@@ -43,6 +43,7 @@ public class LayoutManagerImpl extends RefreshableFeature implements LayoutManag
     private PingSpoof pingSpoof;
 
     private static boolean teamsEnabled;
+    private static boolean hideRealPlayersEnabled;
 
     /**
      * Constructs new instance and loads config options.
@@ -89,6 +90,7 @@ public class LayoutManagerImpl extends RefreshableFeature implements LayoutManag
             TAB.getInstance().getFeatureManager().registerFeature(TabConstants.Feature.LAYOUT_HIDE_REAL_PLAYERS, new LayoutHideRealPlayers());
             LayoutHideRealPlayers hideRealPlayers = TAB.getInstance().getFeatureManager().getFeature(TabConstants.Feature.LAYOUT_HIDE_REAL_PLAYERS);
             hideRealPlayers.load();
+            hideRealPlayersEnabled = true;
         }
         for (TabPlayer p : TAB.getInstance().getOnlinePlayers()) {
             onJoin(p);
@@ -250,7 +252,7 @@ public class LayoutManagerImpl extends RefreshableFeature implements LayoutManag
 
         public String getEntryName(TabPlayer viewer, int slot) {
             if (viewer.getVersion().getNetworkId() >= ProtocolVersion.V1_19_3.getNetworkId()) {
-                if (teamsEnabled) {
+                if (teamsEnabled || hideRealPlayersEnabled) {
                     return "|slot_" + (10+slotTranslator.apply(slot));
                 } else {
                     return " slot_" + (10+slotTranslator.apply(slot));

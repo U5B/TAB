@@ -48,7 +48,9 @@ public class LayoutView {
         for (ParentGroup group : groups) {
             group.sendSlots();
         }
+        int highestSlot = 0;
         for (FixedSlot slot : fixedSlots) {
+            highestSlot = slot.getSlot() > highestSlot ? slot.getSlot() : highestSlot;
             if (slot.updateEntry(viewer, previous)) {
                 continue;
             }
@@ -60,6 +62,12 @@ public class LayoutView {
         for (int slot : emptySlots) {
             // ignore if previous slot was an empty slot as well
             if (previousEmptySlots.contains(slot) && viewer.getTabList().containsEntry(manager.getUUID(slot))) {
+                if (this.pattern.isIgnoreEmptySlots() && slot > highestSlot) {
+                    viewer.getTabList().removeEntry(manager.getUUID(slot));
+                }
+                continue;
+            }
+            if (this.pattern.isIgnoreEmptySlots() && slot > highestSlot) {
                 continue;
             }
             viewer.getTabList().removeEntry(manager.getUUID(slot));

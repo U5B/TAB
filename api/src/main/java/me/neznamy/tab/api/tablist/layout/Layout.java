@@ -76,4 +76,9 @@ public interface Layout {
      *          Slots for this player group
      */
     void addGroup(@Nullable String condition, int[] slots);
+
+    /**
+     * Ignore empty slots after the last filled slot in this Layout
+     */
+    void setIgnoreEmptySlots(boolean ignoreEmptySlots);
 }
