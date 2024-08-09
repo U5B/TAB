@@ -58,6 +58,7 @@ public class LayoutView {
             viewer.getTabList().addEntry(slot.createEntry(viewer));
         }
         // immutable
+        highestSlot = highestSlot - (highestSlot % 20) + 20;
         final List<Integer> previousEmptySlots = previous == null ? Collections.emptyList() : previous.getEmptySlots();
         for (int slot : emptySlots) {
             // ignore if previous slot was an empty slot as well

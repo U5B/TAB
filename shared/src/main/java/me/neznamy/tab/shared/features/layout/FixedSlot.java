@@ -90,7 +90,7 @@ public class FixedSlot extends RefreshableFeature {
         }
         FixedSlot previousSlot = previousLayout.getFixedSlots().stream().filter(x -> x.getId() == id).findAny().orElse(null);
         // Fail if previousSlot skin doesn't equal new skin
-        if (previousSlot == null || !previousSlot.skinProperty.equals(skinProperty)) {
+        if (previousSlot == null || !previousSlot.skin.equals(skin)) {
             return false;
         }
         viewer.setProperty(this, propertyName, text);
