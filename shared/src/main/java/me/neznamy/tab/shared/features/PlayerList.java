@@ -13,6 +13,7 @@ import me.neznamy.tab.shared.TabConstants;
 import me.neznamy.tab.shared.TabConstants.CpuUsageCategory;
 import me.neznamy.tab.shared.chat.SimpleComponent;
 import me.neznamy.tab.shared.chat.TabComponent;
+import me.neznamy.tab.shared.config.files.config.TablistFormattingConfiguration;
 import me.neznamy.tab.shared.cpu.TimedCaughtTask;
 import me.neznamy.tab.shared.features.layout.PlayerSlot;
 import me.neznamy.tab.shared.features.redis.RedisPlayer;
@@ -36,35 +37,28 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class PlayerList extends RefreshableFeature implements TabListFormatManager, JoinListener, Loadable,
         UnLoadable, WorldSwitchListener, ServerSwitchListener, VanishListener, RedisFeature, GroupListener {
 
-    @NotNull
-    private final StringToComponentCache cache = new StringToComponentCache("Tablist formatting", 1000);
-
-    /** Config option toggling anti-override which prevents other plugins from overriding TAB */
-    private final boolean antiOverrideTabList = config().getBoolean("tablist-name-formatting.anti-override", true);
-
-    @Nullable
-    private final RedisSupport redis = TAB.getInstance().getFeatureManager().getFeature(TabConstants.Feature.REDIS_BUNGEE);
-
-    @NotNull
-    private final DisableChecker disableChecker;
+    @NotNull private final StringToComponentCache cache = new StringToComponentCache("Tablist name formatting", 1000);
+    @NotNull private final TablistFormattingConfiguration configuration;
+    @Nullable private final RedisSupport redis = TAB.getInstance().getFeatureManager().getFeature(TabConstants.Feature.REDIS_BUNGEE);
+    @NotNull private final DisableChecker disableChecker;
 
     /**
      * Constructs new instance, registers disable checker into feature manager and starts anti-override.
+     *
+     * @param   configuration
+     *          Feature configuration
      */
-    public PlayerList() {
-        super("Tablist name formatting", "Updating TabList format");
-        Condition disableCondition = Condition.getCondition(config().getString("tablist-name-formatting.disable-condition"));
-        disableChecker = new DisableChecker(this, disableCondition, this::onDisableConditionChange, p -> p.tablistData.disabled);
+    public PlayerList(@NotNull TablistFormattingConfiguration configuration) {
+        this.configuration = configuration;
+        disableChecker = new DisableChecker(this, Condition.getCondition(configuration.disableCondition), this::onDisableConditionChange, p -> p.tablistData.disabled);
         TAB.getInstance().getFeatureManager().registerFeature(TabConstants.Feature.PLAYER_LIST + "-Condition", disableChecker);
-        if (antiOverrideTabList) {
+        if (configuration.antiOverride) {
             TAB.getInstance().getCpu().getTablistEntryCheckThread().repeatTask(new TimedCaughtTask(TAB.getInstance().getCpu(), () -> {
                         for (TabPlayer p : TAB.getInstance().getOnlinePlayers()) {
                             ((TrackedTabList<?, ?>)p.getTabList()).checkDisplayNames();
                         }
                     }, getFeatureName(), CpuUsageCategory.ANTI_OVERRIDE_TABLIST_PERIODIC), 500
             );
-        } else {
-            TAB.getInstance().getConfigHelper().startup().tablistAntiOverrideDisabled();
         }
     }
 
@@ -164,7 +158,7 @@ public class PlayerList extends RefreshableFeature implements TabListFormatManag
             redis.registerMessage("tabformat", UpdateRedisPlayer.class, UpdateRedisPlayer::new);
         }
         for (TabPlayer all : TAB.getInstance().getOnlinePlayers()) {
-            ((TrackedTabList<?, ?>)all.getTabList()).setAntiOverride(antiOverrideTabList);
+            ((TrackedTabList<?, ?>)all.getTabList()).setAntiOverride(configuration.antiOverride);
             loadProperties(all);
             if (disableChecker.isDisableConditionMet(all)) {
                 all.tablistData.disabled.set(true);
@@ -235,6 +229,12 @@ public class PlayerList extends RefreshableFeature implements TabListFormatManag
         updatePlayer(p, !disabledNow);
     }
 
+    @NotNull
+    @Override
+    public String getRefreshDisplayName() {
+        return "Updating TabList format";
+    }
+
     @Override
     public void refresh(@NotNull TabPlayer refreshed, boolean force) {
         if (refreshed.tablistData.prefix == null) return; // Placeholder in condition on join
@@ -263,7 +263,7 @@ public class PlayerList extends RefreshableFeature implements TabListFormatManag
 
     @Override
     public void onJoin(@NotNull TabPlayer connectedPlayer) {
-        ((TrackedTabList<?, ?>)connectedPlayer.getTabList()).setAntiOverride(antiOverrideTabList);
+        ((TrackedTabList<?, ?>)connectedPlayer.getTabList()).setAntiOverride(configuration.antiOverride);
         loadProperties(connectedPlayer);
         if (disableChecker.isDisableConditionMet(connectedPlayer)) {
             connectedPlayer.tablistData.disabled.set(true);
@@ -283,7 +283,7 @@ public class PlayerList extends RefreshableFeature implements TabListFormatManag
             }
         };
         //add packet might be sent after tab's refresh packet, resending again when anti-override is disabled
-        if (!antiOverrideTabList || !TAB.getInstance().getFeatureManager().isFeatureEnabled(TabConstants.Feature.PIPELINE_INJECTION)) {
+        if (!configuration.antiOverride || !TAB.getInstance().getFeatureManager().isFeatureEnabled(TabConstants.Feature.PIPELINE_INJECTION)) {
             TAB.getInstance().getCpu().getProcessingThread().executeLater(new TimedCaughtTask(TAB.getInstance().getCpu(),
                     r, getFeatureName(), CpuUsageCategory.PLAYER_JOIN), 300);
         } else {
@@ -385,6 +385,12 @@ public class PlayerList extends RefreshableFeature implements TabListFormatManag
             if (viewer.getVersion().getMinorVersion() < 8) continue;
             viewer.getTabList().updateDisplayName(player.getUniqueId(), player.getTabFormat());
         }
+    }
+
+    @NotNull
+    @Override
+    public String getFeatureName() {
+        return "Tablist name formatting";
     }
 
     /**

@@ -10,10 +10,15 @@ import me.neznamy.tab.shared.backend.BackendPlatform;
 import me.neznamy.tab.shared.chat.SimpleComponent;
 import me.neznamy.tab.shared.chat.StructuredComponent;
 import me.neznamy.tab.shared.chat.TabComponent;
+import me.neznamy.tab.shared.config.files.config.PerWorldPlayerListConfiguration;
 import me.neznamy.tab.shared.features.injection.PipelineInjector;
 import me.neznamy.tab.shared.features.types.TabFeature;
 import me.neznamy.tab.shared.placeholders.expansion.EmptyTabExpansion;
 import me.neznamy.tab.shared.placeholders.expansion.TabExpansion;
+import me.neznamy.tab.shared.platform.BossBar;
+import me.neznamy.tab.shared.platform.Scoreboard;
+import me.neznamy.tab.shared.platform.TabList;
+import me.neznamy.tab.shared.platform.TabPlayer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
@@ -73,7 +78,7 @@ public class FabricPlatform implements BackendPlatform {
 
     @Override
     @Nullable
-    public TabFeature getPerWorldPlayerList() {
+    public TabFeature getPerWorldPlayerList(@NotNull PerWorldPlayerListConfiguration configuration) {
         return null;
     }
 
@@ -127,6 +132,24 @@ public class FabricPlatform implements BackendPlatform {
             FabricMultiVersion.addSibling(nmsComponent, convertComponent(extra, modern));
         }
         return nmsComponent;
+    }
+
+    @Override
+    @NotNull
+    public Scoreboard createScoreboard(@NotNull TabPlayer player) {
+        return new FabricScoreboard((FabricTabPlayer) player);
+    }
+
+    @Override
+    @NotNull
+    public BossBar createBossBar(@NotNull TabPlayer player) {
+        return new FabricBossBar((FabricTabPlayer) player);
+    }
+
+    @Override
+    @NotNull
+    public TabList createTabList(@NotNull TabPlayer player) {
+        return new FabricTabList((FabricTabPlayer) player);
     }
 
     @Override

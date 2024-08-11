@@ -3,6 +3,7 @@ package me.neznamy.tab.shared.platform;
 import me.neznamy.tab.shared.GroupManager;
 import me.neznamy.tab.shared.TabConstants;
 import me.neznamy.tab.shared.chat.TabComponent;
+import me.neznamy.tab.shared.config.files.config.PerWorldPlayerListConfiguration;
 import me.neznamy.tab.shared.features.injection.PipelineInjector;
 import me.neznamy.tab.shared.features.redis.RedisSupport;
 import me.neznamy.tab.shared.features.types.TabFeature;
@@ -70,9 +71,11 @@ public interface Platform {
     /**
      * Returns per world player list feature handler.
      *
+     * @param   configuration
+     *          Feature configuration
      * @return  Created feature or null if not available on platform
      */
-    @Nullable TabFeature getPerWorldPlayerList();
+    @Nullable TabFeature getPerWorldPlayerList(@NotNull PerWorldPlayerListConfiguration configuration);
 
     /**
      * Sends a console message with TAB's prefix using logger if available,
@@ -139,6 +142,36 @@ public interface Platform {
      */
     @NotNull
     Object convertComponent(@NotNull TabComponent component, boolean modern);
+
+    /**
+     * Creates new scoreboard instance for given player.
+     *
+     * @param   player
+     *          Player to create scoreboard for
+     * @return  Scoreboard implementation for given player
+     */
+    @NotNull
+    Scoreboard createScoreboard(@NotNull TabPlayer player);
+
+    /**
+     * Creates new bossbar instance for given player.
+     *
+     * @param   player
+     *          Player to create bossbar for
+     * @return  Bossbar implementation for given player
+     */
+    @NotNull
+    BossBar createBossBar(@NotNull TabPlayer player);
+
+    /**
+     * Creates new tablist instance for given player.
+     *
+     * @param   player
+     *          Player to create tablist for
+     * @return  TabList implementation for given player
+     */
+    @NotNull
+    TabList createTabList(@NotNull TabPlayer player);
 
     /**
      * Returns {@code true} if the viewer can see the target, {@code false} otherwise.

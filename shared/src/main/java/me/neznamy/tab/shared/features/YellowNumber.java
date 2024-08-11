@@ -10,6 +10,7 @@ import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.TabConstants;
 import me.neznamy.tab.shared.chat.SimpleComponent;
 import me.neznamy.tab.shared.chat.TabComponent;
+import me.neznamy.tab.shared.config.files.config.PlayerListObjectiveConfiguration;
 import me.neznamy.tab.shared.cpu.ThreadExecutor;
 import me.neznamy.tab.shared.cpu.TimedCaughtTask;
 import me.neznamy.tab.shared.features.redis.RedisPlayer;
@@ -51,26 +52,22 @@ public class YellowNumber extends RefreshableFeature implements JoinListener, Qu
     @Getter
     private OnlinePlayers onlinePlayers;
 
-    /** Numeric value to display */
-    private final String rawValue = config().getString("playerlist-objective.value", TabConstants.Placeholder.PING);
-    private final String rawValueFancy = config().getString("playerlist-objective.fancy-value", "&7Ping: " + TabConstants.Placeholder.PING);
+    private final PlayerListObjectiveConfiguration configuration;
 
-    /** Scoreboard display type */
-    private final Scoreboard.HealthDisplay displayType = TabConstants.Placeholder.HEALTH.equals(rawValue) ||
-            "%player_health%".equals(rawValue) || "%player_health_rounded%".equals(rawValue) ?
-            Scoreboard.HealthDisplay.HEARTS : Scoreboard.HealthDisplay.INTEGER;
     private final DisableChecker disableChecker;
 
     @Nullable
-    private final RedisSupport redis = TAB.getInstance().getFeatureManager().getFeature(TabConstants.Feature.REDIS_BUNGEE);;
+    private final RedisSupport redis = TAB.getInstance().getFeatureManager().getFeature(TabConstants.Feature.REDIS_BUNGEE);
 
     /**
      * Constructs new instance and registers disable condition checker to feature manager.
+     *
+     * @param   configuration
+     *          Feature configuration
      */
-    public YellowNumber() {
-        super("Playerlist Objective", "Updating value");
-        Condition disableCondition = Condition.getCondition(config().getString("playerlist-objective.disable-condition"));
-        disableChecker = new DisableChecker(this, disableCondition, this::onDisableConditionChange, p -> p.playerlistObjectiveData.disabled);
+    public YellowNumber(@NotNull PlayerListObjectiveConfiguration configuration) {
+        this.configuration = configuration;
+        disableChecker = new DisableChecker(this, Condition.getCondition(configuration.disableCondition), this::onDisableConditionChange, p -> p.playerlistObjectiveData.disabled);
         TAB.getInstance().getFeatureManager().registerFeature(TabConstants.Feature.YELLOW_NUMBER + "-Condition", disableChecker);
     }
 
@@ -90,11 +87,11 @@ public class YellowNumber extends RefreshableFeature implements JoinListener, Qu
             try {
                 int value = (int) Math.round(Double.parseDouble(string));
                 // Float
-                TAB.getInstance().getConfigHelper().runtime().floatInPlayerlistObjective(p, rawValue, string);
+                TAB.getInstance().getConfigHelper().runtime().floatInPlayerlistObjective(p, configuration.value, string);
                 return value;
             } catch (NumberFormatException e2) {
                 // Not a float (invalid)
-                TAB.getInstance().getConfigHelper().runtime().invalidNumberForPlayerlistObjective(p, rawValue, string);
+                TAB.getInstance().getConfigHelper().runtime().invalidNumberForPlayerlistObjective(p, configuration.value, string);
                 return 0;
             }
         }
@@ -108,8 +105,8 @@ public class YellowNumber extends RefreshableFeature implements JoinListener, Qu
         onlinePlayers = new OnlinePlayers(TAB.getInstance().getOnlinePlayers());
         Map<TabPlayer, Integer> values = new HashMap<>();
         for (TabPlayer loaded : onlinePlayers.getPlayers()) {
-            loaded.playerlistObjectiveData.valueLegacy = new Property(this, loaded, rawValue);
-            loaded.playerlistObjectiveData.valueModern = new Property(this, loaded, rawValueFancy);
+            loaded.playerlistObjectiveData.valueLegacy = new Property(this, loaded, configuration.value);
+            loaded.playerlistObjectiveData.valueModern = new Property(this, loaded, configuration.fancyValue);
             if (disableChecker.isDisableConditionMet(loaded)) {
                 loaded.playerlistObjectiveData.disabled.set(true);
             } else {
@@ -130,8 +127,8 @@ public class YellowNumber extends RefreshableFeature implements JoinListener, Qu
     @Override
     public void onJoin(@NotNull TabPlayer connectedPlayer) {
         onlinePlayers.addPlayer(connectedPlayer);
-        connectedPlayer.playerlistObjectiveData.valueLegacy = new Property(this, connectedPlayer, rawValue);
-        connectedPlayer.playerlistObjectiveData.valueModern = new Property(this, connectedPlayer, rawValueFancy);
+        connectedPlayer.playerlistObjectiveData.valueLegacy = new Property(this, connectedPlayer, configuration.value);
+        connectedPlayer.playerlistObjectiveData.valueModern = new Property(this, connectedPlayer, configuration.fancyValue);
         if (disableChecker.isDisableConditionMet(connectedPlayer)) {
             connectedPlayer.playerlistObjectiveData.disabled.set(true);
         } else {
@@ -195,6 +192,12 @@ public class YellowNumber extends RefreshableFeature implements JoinListener, Qu
         }
     }
 
+    @NotNull
+    @Override
+    public String getRefreshDisplayName() {
+        return "Updating value";
+    }
+
     @Override
     public void refresh(@NotNull TabPlayer refreshed, boolean force) {
         if (refreshed.playerlistObjectiveData.valueLegacy == null) return; // Player not loaded yet (refresh called before onJoin)
@@ -208,7 +211,7 @@ public class YellowNumber extends RefreshableFeature implements JoinListener, Qu
 
     private void register(@NotNull TabPlayer player) {
         if (player.isBedrockPlayer()) return;
-        player.getScoreboard().registerObjective(Scoreboard.DisplaySlot.PLAYER_LIST, OBJECTIVE_NAME, TITLE, displayType, new SimpleComponent(""));
+        player.getScoreboard().registerObjective(Scoreboard.DisplaySlot.PLAYER_LIST, OBJECTIVE_NAME, TITLE, configuration.healthDisplay, new SimpleComponent(""));
     }
 
     /**
@@ -259,6 +262,12 @@ public class YellowNumber extends RefreshableFeature implements JoinListener, Qu
         for (TabPlayer all : onlinePlayers.getPlayers()) {
             redis.sendMessage(new UpdateRedisPlayer(all.getTablistId(), getValueNumber(all), all.playerlistObjectiveData.valueModern.get()));
         }
+    }
+
+    @NotNull
+    @Override
+    public String getFeatureName() {
+        return "Playerlist Objective";
     }
 
     /**
