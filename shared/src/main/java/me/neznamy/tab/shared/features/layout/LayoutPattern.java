@@ -27,14 +27,12 @@ public class LayoutPattern extends RefreshableFeature implements Layout {
     @Nullable private final Condition condition;
     private final Map<Integer, FixedSlot> fixedSlots = new HashMap<>();
     private final List<GroupPattern> groups = new ArrayList<>();
-    private boolean ignoreEmptySlots;
 
     @SuppressWarnings("unchecked")
     public LayoutPattern(@NotNull LayoutManagerImpl manager, @NotNull String name, @NotNull LayoutDefinition def) {
         this.manager = manager;
         this.name = name;
         condition = Condition.getCondition(def.condition);
-        ignoreEmptySlots = def.ignoreEmptySlots;
         if (condition != null) manager.addUsedPlaceholder(TabConstants.Placeholder.condition(condition.getName()));
         for (FixedSlotDefinition fixed : def.fixedSlots) {
             addFixedSlot(fixed);
@@ -108,11 +106,5 @@ public class LayoutPattern extends RefreshableFeature implements Layout {
     @Override
     public String getFeatureName() {
         return manager.getFeatureName();
-    }
-
-    @Override
-    public void setIgnoreEmptySlots(boolean ignore) {
-        ensureActive();
-        ignoreEmptySlots = ignore;
     }
 }

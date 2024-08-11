@@ -46,7 +46,7 @@ public class LayoutManagerImpl extends RefreshableFeature implements LayoutManag
     private static boolean teamsEnabled;
     private static boolean hideRealPlayersEnabled;
 
-    public boolean isTeamsEnabled() {
+    public static boolean isTeamsEnabled() {
         return teamsEnabled || hideRealPlayersEnabled;
     }
 
@@ -193,7 +193,7 @@ public class LayoutManagerImpl extends RefreshableFeature implements LayoutManag
     @Override
     public Layout createNewLayout(String name) {
         ensureActive();
-        return new LayoutPattern(this, name, new LayoutDefinition(null, Collections.emptyList(), new LinkedHashMap<>(), false));
+        return new LayoutPattern(this, name, new LayoutDefinition(null, Collections.emptyList(), new LinkedHashMap<>()));
     }
 
     @Override

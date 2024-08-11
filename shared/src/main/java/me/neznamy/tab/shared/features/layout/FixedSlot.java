@@ -106,7 +106,7 @@ public class FixedSlot extends RefreshableFeature {
     }
 
     /**
-     * Creates a new instance with given parameters. It may return {@code null} if pattern is invalid.
+     * Creates a new instance with given parameters.
      *
      * @param   def
      *          Fixed slot definition

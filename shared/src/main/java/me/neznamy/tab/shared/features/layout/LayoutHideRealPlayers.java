@@ -19,7 +19,12 @@ public class LayoutHideRealPlayers extends TabFeature implements JoinListener, L
      * Constructs new instance.
      */
     public LayoutHideRealPlayers() {
-        super("Layout (Hide Players)");
+        super();
+    }
+
+    @Override
+    public String getFeatureName() {
+        return "Layout (Hide Players)";
     }
 
     @Override

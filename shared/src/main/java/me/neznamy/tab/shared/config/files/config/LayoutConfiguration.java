@@ -1,5 +1,13 @@
 package me.neznamy.tab.shared.config.files.config;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import me.neznamy.tab.shared.ProtocolVersion;
 import me.neznamy.tab.shared.chat.EnumChatFormat;
@@ -11,9 +19,6 @@ import me.neznamy.tab.shared.platform.TabPlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
-import java.util.function.Function;
-
 public class LayoutConfiguration extends ConfigurationSection {
 
     private final String SECTION = "layout";
@@ -24,6 +29,8 @@ public class LayoutConfiguration extends ConfigurationSection {
     public final int emptySlotPing = getInt(SECTION + ".empty-slot-ping-value", 1000);
     @NotNull public final Map<Integer, String> defaultSkinHashMap = new HashMap<>();
     @NotNull public final LinkedHashMap<String, LayoutDefinition> layouts = new LinkedHashMap<>();
+    public final boolean hideRealPlayers = getBoolean(SECTION + ".hide-real-players", false);
+    public final boolean ignoreEmptySlots = getBoolean(SECTION + ".ignore-empty-slots", false);
 
     public LayoutConfiguration(@NotNull ConfigurationFile config) {
         super(config);
