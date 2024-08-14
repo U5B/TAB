@@ -1,5 +1,9 @@
 package me.neznamy.tab.shared.config;
 
+import java.io.File;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.Collection;
 import lombok.Getter;
 import me.neznamy.tab.shared.FeatureManager;
 import me.neznamy.tab.shared.TAB;
@@ -16,11 +20,6 @@ import me.neznamy.tab.shared.features.globalplayerlist.GlobalPlayerList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.yaml.snakeyaml.error.YAMLException;
-
-import java.io.File;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.Collection;
 
 /**
  * Core of loading configuration files

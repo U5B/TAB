@@ -129,6 +129,8 @@ scoreboard:
 # https://github.com/NEZNAMY/TAB/wiki/Feature-guide:-Layout
 layout:
   enabled: false
+  hide-real-players: false
+  ignore-empty-slots: false
   direction: COLUMNS
   default-skin: mineskin:1753261242
   enable-remaining-players-text: true

@@ -1,23 +1,22 @@
 package me.neznamy.tab.shared.placeholders;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Date;
+import java.util.Map.Entry;
 import lombok.Getter;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.TabConstants;
+import me.neznamy.tab.shared.config.files.animations.AnimationConfiguration.AnimationDefinition;
 import me.neznamy.tab.shared.config.files.config.ConditionsSection.ConditionDefinition;
 import me.neznamy.tab.shared.config.files.config.PlaceholdersConfiguration;
-import me.neznamy.tab.shared.config.files.animations.AnimationConfiguration.AnimationDefinition;
 import me.neznamy.tab.shared.features.PlaceholderManagerImpl;
 import me.neznamy.tab.shared.hook.LuckPermsHook;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
 import me.neznamy.tab.shared.platform.TabPlayer;
 import me.neznamy.tab.shared.util.PerformanceUtil;
 import org.jetbrains.annotations.NotNull;
-
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.util.Date;
-import java.util.Map.Entry;
 
 /**
  * An implementation of PlaceholderRegistry for universal placeholders

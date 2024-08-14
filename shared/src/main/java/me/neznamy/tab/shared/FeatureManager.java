@@ -1,11 +1,22 @@
 package me.neznamy.tab.shared;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import me.neznamy.tab.api.placeholder.PlayerPlaceholder;
 import me.neznamy.tab.shared.TabConstants.CpuUsageCategory;
 import me.neznamy.tab.shared.config.files.config.Config;
 import me.neznamy.tab.shared.config.mysql.MySQLUserConfiguration;
 import me.neznamy.tab.shared.cpu.TimedCaughtTask;
-import me.neznamy.tab.shared.features.*;
+import me.neznamy.tab.shared.features.BelowName;
+import me.neznamy.tab.shared.features.HeaderFooter;
+import me.neznamy.tab.shared.features.NickCompatibility;
+import me.neznamy.tab.shared.features.PingSpoof;
+import me.neznamy.tab.shared.features.PlayerList;
+import me.neznamy.tab.shared.features.SpectatorFix;
+import me.neznamy.tab.shared.features.YellowNumber;
 import me.neznamy.tab.shared.features.bossbar.BossBarManagerImpl;
 import me.neznamy.tab.shared.features.globalplayerlist.GlobalPlayerList;
 import me.neznamy.tab.shared.features.injection.PipelineInjector;
@@ -15,7 +26,25 @@ import me.neznamy.tab.shared.features.redis.RedisPlayer;
 import me.neznamy.tab.shared.features.redis.RedisSupport;
 import me.neznamy.tab.shared.features.scoreboard.ScoreboardManagerImpl;
 import me.neznamy.tab.shared.features.sorting.Sorting;
-import me.neznamy.tab.shared.features.types.*;
+import me.neznamy.tab.shared.features.types.CommandListener;
+import me.neznamy.tab.shared.features.types.CustomThreaded;
+import me.neznamy.tab.shared.features.types.DisplayObjectiveListener;
+import me.neznamy.tab.shared.features.types.EntryAddListener;
+import me.neznamy.tab.shared.features.types.GameModeListener;
+import me.neznamy.tab.shared.features.types.GroupListener;
+import me.neznamy.tab.shared.features.types.HideEntryListener;
+import me.neznamy.tab.shared.features.types.JoinListener;
+import me.neznamy.tab.shared.features.types.LatencyListener;
+import me.neznamy.tab.shared.features.types.Loadable;
+import me.neznamy.tab.shared.features.types.ObjectiveListener;
+import me.neznamy.tab.shared.features.types.QuitListener;
+import me.neznamy.tab.shared.features.types.RedisFeature;
+import me.neznamy.tab.shared.features.types.ServerSwitchListener;
+import me.neznamy.tab.shared.features.types.TabFeature;
+import me.neznamy.tab.shared.features.types.TabListClearListener;
+import me.neznamy.tab.shared.features.types.UnLoadable;
+import me.neznamy.tab.shared.features.types.VanishListener;
+import me.neznamy.tab.shared.features.types.WorldSwitchListener;
 import me.neznamy.tab.shared.platform.TabPlayer;
 import me.neznamy.tab.shared.platform.decorators.TrackedTabList;
 import me.neznamy.tab.shared.proxy.ProxyPlatform;
@@ -23,8 +52,6 @@ import me.neznamy.tab.shared.proxy.ProxyTabPlayer;
 import me.neznamy.tab.shared.proxy.message.outgoing.Unload;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.*;
 
 /**
  * Feature registration which offers calls to all features
@@ -41,6 +68,9 @@ public class FeatureManager {
 
     /** Flag tracking presence of a feature listening to latency change for faster check with better performance */
     private boolean hasLatencyChangeListener;
+
+    /** Flag traacking presence of a feature listening to hide entries for faster check with better performance */
+    private boolean hasHideEntryListener;
 
     /** Flag tracking presence of a feature listening to command preprocess for faster check with better performance */
     private boolean hasCommandListener;
@@ -495,6 +525,29 @@ public class FeatureManager {
     }
 
     /**
+     * Forwards listing change to all features and returns if listing should to use.
+     *
+     * @param   packetReceiver
+     *          Player who received the packet
+     * @param   id
+     *          UUID of player whose ping changed
+     * @param   latency
+     *          Latency in the packet
+     * @return  New latency to use
+     */
+    public boolean shouldHideEntry(TabPlayer packetReceiver, UUID id, boolean listed) {
+        if (!hasHideEntryListener) return listed;
+        boolean newListing = listed;
+        for (TabFeature f : values) {
+            if (!(f instanceof HideEntryListener)) continue;
+            long time = System.nanoTime();
+            newListing = ((HideEntryListener)f).shouldHideEntry(packetReceiver, id, newListing);
+            TAB.getInstance().getCPUManager().addTime(f.getFeatureName(), CpuUsageCategory.HIDE_ENTRY_CHANGE, System.nanoTime() - time);
+        }
+        return newListing;
+    }
+
+    /**
      * Registers feature with given parameters.
      *
      * @param   featureName
@@ -513,6 +566,9 @@ public class FeatureManager {
         }
         if (featureHandler instanceof LatencyListener) {
             hasLatencyChangeListener = true;
+        }
+        if (featureHandler instanceof HideEntryListener) {
+            hasHideEntryListener = true;
         }
         if (featureHandler instanceof CommandListener) {
             hasCommandListener = true;

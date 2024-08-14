@@ -1,5 +1,14 @@
 package me.neznamy.tab.shared.features.layout;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.TreeMap;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.NonNull;
 import me.neznamy.tab.api.tablist.layout.Layout;
@@ -11,13 +20,16 @@ import me.neznamy.tab.shared.config.files.config.LayoutConfiguration.LayoutDefin
 import me.neznamy.tab.shared.features.PingSpoof;
 import me.neznamy.tab.shared.features.PlayerList;
 import me.neznamy.tab.shared.features.layout.skin.SkinManager;
-import me.neznamy.tab.shared.features.types.*;
+import me.neznamy.tab.shared.features.types.JoinListener;
+import me.neznamy.tab.shared.features.types.Loadable;
+import me.neznamy.tab.shared.features.types.QuitListener;
+import me.neznamy.tab.shared.features.types.RefreshableFeature;
+import me.neznamy.tab.shared.features.types.TabListClearListener;
+import me.neznamy.tab.shared.features.types.UnLoadable;
+import me.neznamy.tab.shared.features.types.VanishListener;
 import me.neznamy.tab.shared.platform.TabPlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.*;
-import java.util.Map.Entry;
 
 @Getter
 public class LayoutManagerImpl extends RefreshableFeature implements LayoutManager, JoinListener, QuitListener, VanishListener, Loadable,
@@ -30,7 +42,12 @@ public class LayoutManagerImpl extends RefreshableFeature implements LayoutManag
     private final Map<TabPlayer, String> sortedPlayers = Collections.synchronizedMap(new TreeMap<>(Comparator.comparing(p -> p.layoutData.sortingString)));
     private PlayerList playerList;
     private PingSpoof pingSpoof;
-    @Getter private static boolean teamsEnabled;
+    private static boolean teamsEnabled;
+    private static boolean hideRealPlayersEnabled = false;
+
+    public static boolean isTeamsEnabled() {
+        return teamsEnabled || hideRealPlayersEnabled;
+    }
 
     /**
      * Constructs new instance.
@@ -57,6 +74,12 @@ public class LayoutManagerImpl extends RefreshableFeature implements LayoutManag
         pingSpoof = TAB.getInstance().getFeatureManager().getFeature(TabConstants.Feature.PING_SPOOF);
         teamsEnabled = TAB.getInstance().getNameTagManager() != null;
         if (pingSpoof == null) TAB.getInstance().getFeatureManager().registerFeature(TabConstants.Feature.LAYOUT_LATENCY, new LayoutLatencyRefresher());
+        if (this.configuration.hideRealPlayers) {
+            TAB.getInstance().getFeatureManager().registerFeature(TabConstants.Feature.LAYOUT_HIDE_REAL_PLAYERS, new LayoutHideRealPlayers());
+            LayoutHideRealPlayers hideRealPlayers = TAB.getInstance().getFeatureManager().getFeature(TabConstants.Feature.LAYOUT_HIDE_REAL_PLAYERS);
+            hideRealPlayers.load();
+            hideRealPlayersEnabled = true;
+        }
         for (TabPlayer p : TAB.getInstance().getOnlinePlayers()) {
             onJoin(p);
         }
@@ -103,12 +126,13 @@ public class LayoutManagerImpl extends RefreshableFeature implements LayoutManag
         LayoutView current = p.layoutData.view;
         String currentName = current == null ? null : current.getPattern().getName();
         if (!Objects.equals(highestName, currentName)) {
-            if (current != null) current.destroy();
-            p.layoutData.view = null;
             if (highest != null) {
                 LayoutView view = new LayoutView(this, highest, p);
-                view.send();
+                view.send(current);
                 p.layoutData.view = view;
+            } else {
+                if (current != null) current.destroy();
+                p.layoutData.view = null;
             }
         }
     }

@@ -1,11 +1,14 @@
 package me.neznamy.tab.shared.features.layout;
 
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import lombok.Getter;
 import me.neznamy.tab.shared.config.files.config.LayoutConfiguration.LayoutDefinition.GroupPattern;
-import me.neznamy.tab.shared.platform.TabPlayer;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
+import me.neznamy.tab.shared.platform.TabList;
+import me.neznamy.tab.shared.platform.TabPlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,10 +53,12 @@ public class ParentGroup {
             }
         }
     }
-    
+
     public void sendSlots() {
         for (PlayerSlot s : playerSlots.values()) {
-            viewer.getTabList().addEntry(s.getSlot(viewer));
+            TabList.Entry entry = s.getSlot(viewer);
+            viewer.getTabList().removeEntry(entry.getUniqueId());
+            viewer.getTabList().addEntry(entry);
         }
     }
 }

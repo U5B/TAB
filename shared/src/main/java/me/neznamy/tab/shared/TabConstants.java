@@ -64,6 +64,7 @@ public class TabConstants {
         public static final String ANTI_OVERRIDE_SCOREBOARDS_PACKET = "Scoreboard anti override (packet listener)";
 
         public static final String PING_CHANGE = "Processing ping change";
+        public static final String HIDE_ENTRY_CHANGE = "Processing hide status of entry";
         public static final String NICK_PLUGIN_COMPATIBILITY = "Compatibility with nick plugins";
         public static final String BYTE_BUF = "ByteBuf";
         public static final String PACKET_LOGIN = "Login packet";
@@ -144,6 +145,7 @@ public class TabConstants {
         public static final String SORTING = "sorting";
         public static final String LAYOUT = "layout";
         public static final String LAYOUT_LATENCY = "layout-latency";
+        public static final String LAYOUT_HIDE_REAL_PLAYERS = "layout-hide-real-players";
         public static final String PIPELINE_INJECTION = "injection";
         public static final String BOSS_BAR = "BossBar";
         public static final String NAME_TAGS = "NameTag16";

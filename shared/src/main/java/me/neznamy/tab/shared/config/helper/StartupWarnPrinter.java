@@ -1,12 +1,11 @@
 package me.neznamy.tab.shared.config.helper;
 
+import java.io.File;
+import java.util.Set;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.chat.TabComponent;
 import me.neznamy.tab.shared.features.sorting.types.SortingType;
 import org.jetbrains.annotations.NotNull;
-
-import java.io.File;
-import java.util.Set;
 
 /**
  * Class for printing startup warns when features are

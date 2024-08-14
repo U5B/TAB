@@ -1,14 +1,13 @@
 package me.neznamy.tab.shared.config.files;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.config.file.ConfigurationFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 @SuppressWarnings("unchecked")
 @RequiredArgsConstructor
@@ -39,7 +38,7 @@ public class ConfigurationSection {
     protected void startupWarn(@NotNull String message) {
         TAB.getInstance().getConfigHelper().startup().startupWarn(file.getFile(), message);
     }
-    
+
     protected void hint(@NotNull String message) {
         TAB.getInstance().getConfigHelper().hint(file.getFile(), message);
     }
@@ -50,6 +49,10 @@ public class ConfigurationSection {
     }
 
     protected boolean getBoolean(@NotNull String path, boolean defaultValue) {
+        return getRequired(path, defaultValue, Boolean.class);
+    }
+
+    protected boolean getBoolean(@NotNull String[] path, boolean defaultValue) {
         return getRequired(path, defaultValue, Boolean.class);
     }
 

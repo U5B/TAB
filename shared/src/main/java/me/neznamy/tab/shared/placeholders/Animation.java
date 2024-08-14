@@ -2,13 +2,12 @@ package me.neznamy.tab.shared.placeholders;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import lombok.Getter;
 import lombok.NonNull;
-import me.neznamy.tab.shared.chat.EnumChatFormat;
-import me.neznamy.tab.shared.chat.rgb.RGBUtils;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.TabConstants;
+import me.neznamy.tab.shared.chat.EnumChatFormat;
+import me.neznamy.tab.shared.chat.rgb.RGBUtils;
 import me.neznamy.tab.shared.config.files.animations.AnimationConfiguration;
 import me.neznamy.tab.shared.config.files.animations.AnimationConfiguration.AnimationDefinition;
 import me.neznamy.tab.shared.features.PlaceholderManagerImpl;
@@ -24,10 +23,10 @@ public class Animation {
 
     /** Animation's name defined in configuration */
     @Getter private final String name;
-    
+
     /** All defined frames of the animation */
     private final String[] messages;
-    
+
     /** Configured change interval for animation to jump to the next frame */
     private final int interval;
 
@@ -38,7 +37,7 @@ public class Animation {
      * such as this being a slow animation with a fast nested animation.
      */
     @Getter private final int refresh;
-    
+
     /**
      * Constructs new instance with given arguments which are fixed if necessary, such as when
      * refresh is not divisible by {@link TabConstants.Placeholder#MINIMUM_REFRESH_INTERVAL}
