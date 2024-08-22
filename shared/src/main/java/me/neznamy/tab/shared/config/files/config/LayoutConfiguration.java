@@ -35,7 +35,7 @@ public class LayoutConfiguration extends ConfigurationSection {
     public LayoutConfiguration(@NotNull ConfigurationFile config) {
         super(config);
         checkForUnknownKey(SECTION, Arrays.asList("enabled", "direction", "default-skin", "enable-remaining-players-text",
-                "remaining-players-text", "empty-slot-ping-value", "default-skins", "layouts"));
+                "remaining-players-text", "empty-slot-ping-value", "default-skins", "layouts", "hide-real-players", "ignore-empty-slots"));
 
         Map<?, ?> defaultSkins = getMap(SECTION + ".default-skins");
         if (defaultSkins != null) {

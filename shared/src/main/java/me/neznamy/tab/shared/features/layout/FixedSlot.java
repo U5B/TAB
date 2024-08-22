@@ -51,9 +51,7 @@ public class FixedSlot extends RefreshableFeature {
             p.getTabList().removeEntry(id);
             p.getTabList().addEntry(createEntry(p));
         } else {
-            if (p.getProperty(propertyName).update()) {
-                p.getTabList().updateDisplayName(id, cache.get(p.getProperty(propertyName).get()));
-            }
+            p.getTabList().updateDisplayName(id, cache.get(p.getProperty(propertyName).updateAndGet()));
         }
     }
 
@@ -96,9 +94,7 @@ public class FixedSlot extends RefreshableFeature {
         }
         viewer.setProperty(this, propertyName, text);
         viewer.setProperty(this, skinProperty, skin);
-        if (viewer.getProperty(propertyName).update()) {
-            viewer.getTabList().updateDisplayName(id, cache.get(viewer.getProperty(propertyName).get()));
-        }
+        viewer.getTabList().updateDisplayName(id, cache.get(viewer.getProperty(propertyName).updateAndGet()));
         if (previousSlot.ping != ping) {
             viewer.getTabList().updateLatency(id, ping);
         }
