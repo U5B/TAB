@@ -78,11 +78,11 @@ public class LayoutView {
                 }
                 continue;
             }
+            viewer.getTabList().removeEntry(manager.getUUID(slot));
             if (ignoreEmptySlots() && slot > highestSlot) {
                 // emptySlots.remove(slot);
                 continue;
             }
-            viewer.getTabList().removeEntry(manager.getUUID(slot));
             viewer.getTabList().addEntry(new TabList.Entry(
                     manager.getUUID(slot),
                     manager.getConfiguration().direction.getEntryName(viewer, slot, LayoutManagerImpl.isTeamsEnabled()),

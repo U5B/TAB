@@ -57,8 +57,8 @@ public abstract class SkinSource {
         }
         Skin downloaded = download(skin);
         if (downloaded != null) {
+            skins.put(skin, downloaded);
             cache.put(skin, Arrays.asList(downloaded.getValue(), downloaded.getSignature()));
-            file.set(path, cache);
         }
         return downloaded;
     }
@@ -78,5 +78,9 @@ public abstract class SkinSource {
         try (InputStreamReader reader = new InputStreamReader(new URL(url).openStream())) {
             return (JSONObject) new JSONParser().parse(reader);
         }
+    }
+
+    public void unload() {
+        file.set(path, cache);
     }
 }

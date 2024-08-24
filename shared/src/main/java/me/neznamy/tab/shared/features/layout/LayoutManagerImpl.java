@@ -145,6 +145,7 @@ public class LayoutManagerImpl extends RefreshableFeature implements LayoutManag
                 p.getTabList().removeEntry(id);
             }
         }
+        skinManager.unload();
     }
 
     @Override

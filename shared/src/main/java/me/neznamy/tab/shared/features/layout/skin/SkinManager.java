@@ -99,4 +99,10 @@ public class SkinManager {
         TAB.getInstance().getConfigHelper().startup().invalidLayoutSkinDefinition(skin);
         return null;
     }
+
+    public void unload() {
+        for (SkinSource source : sources.values()) {
+            source.unload();
+        }
+    }
 }
