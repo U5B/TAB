@@ -78,11 +78,11 @@ public class LayoutView {
                 }
                 continue;
             }
-            viewer.getTabList().removeEntry(manager.getUUID(slot));
             if (ignoreEmptySlots() && slot > highestSlot) {
                 // emptySlots.remove(slot);
                 continue;
             }
+            viewer.getTabList().removeEntry(manager.getUUID(slot));
             viewer.getTabList().addEntry(new TabList.Entry(
                     manager.getUUID(slot),
                     manager.getConfiguration().direction.getEntryName(viewer, slot, LayoutManagerImpl.isTeamsEnabled()),
@@ -93,8 +93,8 @@ public class LayoutView {
                     new SimpleComponent("")
             ));
         }
-        if (ignoreEmptySlots() && previousEmptySlots != null) {
-            for (int slot : previousEmptySlots) {
+        if (ignoreEmptySlots()) {
+            for (int slot = 1; slot <= 80; slot++) {
                 if (slot > highestSlot && viewer.getTabList().containsEntry(manager.getUUID(slot))) {
                     viewer.getTabList().removeEntry(manager.getUUID(slot));
                 }
@@ -108,9 +108,8 @@ public class LayoutView {
     }
 
     public void destroy() {
-        if (viewer.getVersion().getMinorVersion() < 8 || viewer.isBedrockPlayer()) return;
-        for (UUID id : manager.getUuids().values()) {
-            viewer.getTabList().removeEntry(id);
+        for (FixedSlot slot : fixedSlots) {
+            TAB.getInstance().getPlaceholderManager().removeUsedPlaceholder(slot);
         }
     }
 

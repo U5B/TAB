@@ -107,6 +107,9 @@ public class LayoutManagerImpl extends RefreshableFeature implements LayoutManag
     @Override
     public void onQuit(@NotNull TabPlayer p) {
         sortedPlayers.remove(p);
+        if (p.layoutData.view != null) {
+            p.layoutData.view.destroy();
+        }
         for (TabPlayer all : TAB.getInstance().getOnlinePlayers()) {
             if (all == p) continue;
             if (all.layoutData.view != null) all.layoutData.view.tick();
@@ -126,12 +129,12 @@ public class LayoutManagerImpl extends RefreshableFeature implements LayoutManag
         LayoutView current = p.layoutData.view;
         String currentName = current == null ? null : current.getPattern().getName();
         if (!Objects.equals(highestName, currentName)) {
+            if (current != null) current.destroy();
             if (highest != null) {
                 LayoutView view = new LayoutView(this, highest, p);
                 view.send(current);
                 p.layoutData.view = view;
             } else {
-                if (current != null) current.destroy();
                 p.layoutData.view = null;
             }
         }

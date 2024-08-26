@@ -32,7 +32,7 @@ public abstract class SkinSource {
     @NotNull private final Map<String, List<String>> cache;
 
     /** Cached skins as skin objects */
-    @NotNull private final Map<String, Skin> skins = new HashMap<>();
+    @NotNull protected final Map<String, Skin> skins = new HashMap<>();
 
     protected SkinSource(@NotNull ConfigurationFile file, @NotNull String path) {
         this.file = file;

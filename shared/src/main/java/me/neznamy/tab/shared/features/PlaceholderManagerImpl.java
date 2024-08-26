@@ -158,7 +158,7 @@ public class PlaceholderManagerImpl extends RefreshableFeature implements Placeh
         if (results.isEmpty()) return;
         for (Entry<PlayerPlaceholderImpl, Map<TabPlayer, String>> entry : results.entrySet()) {
             PlayerPlaceholderImpl placeholder = entry.getKey();
-            Set<RefreshableFeature> placeholderUsage = getPlaceholderUsage(placeholder.getIdentifier());
+            final Set<RefreshableFeature> placeholderUsage = getPlaceholderUsage(placeholder.getIdentifier());
             for (Entry<TabPlayer, String> playerResult : entry.getValue().entrySet()) {
                 TabPlayer player = playerResult.getKey();
                 if (!player.isOnline()) continue; // Player disconnected in the meantime while refreshing in another thread
@@ -301,6 +301,20 @@ public class PlaceholderManagerImpl extends RefreshableFeature implements Placeh
             for (TabPlayer all : TAB.getInstance().getOnlinePlayers()) {
                 tabExpansion.setPlaceholderValue(all, p.getIdentifier(), p.getLastValueSafe(all));
             }
+        }
+    }
+
+    public synchronized void removeUsedPlaceholder(String identifier, @NonNull RefreshableFeature feature) {
+        placeholderUsage.computeIfPresent(identifier, (a, b) -> {
+            b.remove(feature);
+            b.removeIf(x -> x == null);
+            return b;
+        });
+    }
+
+    public synchronized void removeUsedPlaceholder(@NonNull RefreshableFeature feature) {
+        for (String identifier : placeholderUsage.keySet()) {
+            removeUsedPlaceholder(identifier, feature);
         }
     }
 
