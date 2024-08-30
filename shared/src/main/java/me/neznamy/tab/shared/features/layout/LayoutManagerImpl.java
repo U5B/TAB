@@ -128,7 +128,7 @@ public class LayoutManagerImpl extends RefreshableFeature implements LayoutManag
         String highestName = highest == null ? null : highest.getName();
         LayoutView current = p.layoutData.view;
         String currentName = current == null ? null : current.getPattern().getName();
-        if (!Objects.equals(highestName, currentName)) {
+        if (!Objects.equals(highestName, currentName) || force) {
             if (current != null) current.destroy();
             if (highest != null) {
                 LayoutView view = new LayoutView(this, highest, p);
@@ -205,7 +205,7 @@ public class LayoutManagerImpl extends RefreshableFeature implements LayoutManag
         TabPlayer p = (TabPlayer) player;
         p.ensureLoaded();
         p.layoutData.forcedLayout = (LayoutPattern) layout;
-        refresh(p, false);
+        refresh(p, true);
     }
 
     @Override
@@ -214,7 +214,7 @@ public class LayoutManagerImpl extends RefreshableFeature implements LayoutManag
         TabPlayer p = (TabPlayer) player;
         p.ensureLoaded();
         p.layoutData.forcedLayout = null;
-        refresh(p, false);
+        refresh(p, true);
     }
 
     @NotNull

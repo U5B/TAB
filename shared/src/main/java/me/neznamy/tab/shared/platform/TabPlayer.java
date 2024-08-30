@@ -197,6 +197,10 @@ public abstract class TabPlayer implements me.neznamy.tab.api.TabPlayer {
         }
     }
 
+    public void removeProperty(String identifier) {
+        properties.remove(identifier);
+    }
+
     /**
      * Marks the player as loaded and calls PlayerLoadEvent
      *

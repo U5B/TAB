@@ -106,10 +106,13 @@ public class LayoutView {
     public boolean ignoreEmptySlots() {
         return this.manager.getConfiguration().ignoreEmptySlots && this.manager.getConfiguration().hideRealPlayers;
     }
-
     public void destroy() {
         for (FixedSlot slot : fixedSlots) {
             TAB.getInstance().getPlaceholderManager().removeUsedPlaceholder(slot);
+            for (TabPlayer player : TAB.getInstance().getOnlinePlayers()) {
+                player.removeProperty(slot.getPropertyName());
+                player.removeProperty(slot.getSkinProperty());
+            }
         }
     }
 

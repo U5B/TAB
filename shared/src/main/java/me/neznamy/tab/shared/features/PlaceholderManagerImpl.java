@@ -89,8 +89,10 @@ public class PlaceholderManagerImpl extends RefreshableFeature implements Placeh
     private void processRefreshResults(@NotNull PlaceholderRefreshTask task) {
         long time = System.nanoTime();
         Map<RefreshableFeature, Collection<TabPlayer>> update = new HashMap<>();
+        final Set<TabPlayer> players = Collections.newSetFromMap(new WeakHashMap<TabPlayer, Boolean>());
+        players.addAll(TAB.getInstance().getData().values());
         for (RefreshableFeature f : updateServerPlaceholders(task.getServerPlaceholderResults())) {
-            update.put(f, new HashSet<>(TAB.getInstance().getData().values()));
+            update.put(f, players);
         }
         updatePlayerPlaceholders(task.getPlayerPlaceholderResults(), update);
         Map<RefreshableFeature, Collection<TabPlayer>> forceUpdate = updateRelationalPlaceholders(task.getRelationalPlaceholderResults());
@@ -99,7 +101,7 @@ public class PlaceholderManagerImpl extends RefreshableFeature implements Placeh
 
         refreshFeatures(forceUpdate, update);
     }
-    
+
     private void refreshFeatures(@NotNull Map<RefreshableFeature, Collection<TabPlayer>> forceUpdate, @NotNull Map<RefreshableFeature, Collection<TabPlayer>> update) {
         for (Entry<RefreshableFeature, Collection<TabPlayer>> entry : update.entrySet()) {
             TimedCaughtTask task = new TimedCaughtTask(TAB.getInstance().getCpu(), () -> {
@@ -144,7 +146,7 @@ public class PlaceholderManagerImpl extends RefreshableFeature implements Placeh
                     if (placeholder.hasValueChanged(viewer, target, targetResult.getValue())) {
                         placeholder.updateParents(target);
                         for (RefreshableFeature f : placeholderUsage) {
-                            update.computeIfAbsent(f, c -> new HashSet<>()).add(target);
+                            update.computeIfAbsent(f, c -> Collections.newSetFromMap(new WeakHashMap<TabPlayer, Boolean>())).add(target);
                         }
                     }
                 }
@@ -165,7 +167,7 @@ public class PlaceholderManagerImpl extends RefreshableFeature implements Placeh
                 if (placeholder.hasValueChanged(player, playerResult.getValue(), true)) {
                     placeholder.updateParents(player);
                     for (RefreshableFeature f : placeholderUsage) {
-                        update.computeIfAbsent(f, c -> new HashSet<>()).add(player);
+                        update.computeIfAbsent(f, c -> Collections.newSetFromMap(new WeakHashMap<TabPlayer, Boolean>())).add(player);
                     }
                     if (placeholder.getIdentifier().equals(TabConstants.Placeholder.VANISHED)) {
                         TAB.getInstance().getFeatureManager().onVanishStatusChange(player);
@@ -180,7 +182,7 @@ public class PlaceholderManagerImpl extends RefreshableFeature implements Placeh
 
     @NotNull
     private Set<RefreshableFeature> updateServerPlaceholders(@NotNull Map<ServerPlaceholderImpl, String> results) {
-        Set<RefreshableFeature> set = new HashSet<>();
+        Set<RefreshableFeature> set = Collections.newSetFromMap(new WeakHashMap<RefreshableFeature, Boolean>());
         for (Entry<ServerPlaceholderImpl, String> entry : results.entrySet()) {
             ServerPlaceholderImpl placeholder = entry.getKey();
             if (placeholder.hasValueChanged(entry.getValue())) {
@@ -295,7 +297,7 @@ public class PlaceholderManagerImpl extends RefreshableFeature implements Placeh
      *          Feature using the placeholder
      */
     public synchronized void addUsedPlaceholder(@NonNull String identifier, @NonNull RefreshableFeature feature) {
-        if (placeholderUsage.computeIfAbsent(identifier, x -> new HashSet<>()).add(feature)) {
+        if (placeholderUsage.computeIfAbsent(identifier, x -> Collections.newSetFromMap(new WeakHashMap<RefreshableFeature, Boolean>())).add(feature)) {
             recalculateUsedPlaceholders();
             TabPlaceholder p = getPlaceholder(identifier);
             for (TabPlayer all : TAB.getInstance().getOnlinePlayers()) {
@@ -349,7 +351,7 @@ public class PlaceholderManagerImpl extends RefreshableFeature implements Placeh
      */
     @NotNull
     public Set<RefreshableFeature> getPlaceholderUsage(@NotNull String identifier) {
-        Set<RefreshableFeature> usage = placeholderUsage.getOrDefault(identifier, new HashSet<>());
+        Set<RefreshableFeature> usage = placeholderUsage.getOrDefault(identifier, Collections.newSetFromMap(new WeakHashMap<RefreshableFeature, Boolean>()));
         for (String parent : getPlaceholder(identifier).getParents()) {
             usage.addAll(getPlaceholderUsage(parent));
         }
