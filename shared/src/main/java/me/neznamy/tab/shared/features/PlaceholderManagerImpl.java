@@ -310,6 +310,9 @@ public class PlaceholderManagerImpl extends RefreshableFeature implements Placeh
         placeholderUsage.computeIfPresent(identifier, (a, b) -> {
             b.remove(feature);
             b.removeIf(x -> x == null);
+            if (b.isEmpty()) {
+                return null;
+            }
             return b;
         });
     }
